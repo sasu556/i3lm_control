@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <!-- نفس محتوى head السابق دون تغيير -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تحكم البائعين - منصة إعلم</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* نفس الأنماط السابقة بالكامل */
+    :root { --bg: #f1f5f9; --card: #ffffff; --primary: #2563eb; --danger: #ef4444; --success: #10b981; --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --radius: 14px; }
+    body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding: 20px; direction: rtl; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    .header { text-align: center; margin: 30px 0; }
+    .header h1 { font-size: 28px; font-weight: 800; color: var(--text); margin: 0; }
+    .header p { color: var(--muted); margin-top: 8px; }
+    .add-seller-card, .sellers-card { background: var(--card); border-radius: var(--radius); padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); margin-bottom: 24px; border: 1px solid var(--border); }
+    .card-title { font-size: 18px; font-weight: 700; margin: 0 0 16px; display: flex; align-items: center; gap: 8px; }
+    .form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+    .form-group { flex: 1; min-width: 150px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--muted); }
+    .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-family: 'Cairo', sans-serif; font-size: 14px; box-sizing: border-box; background: #f8fafc; }
+    .btn { padding: 10px 22px; border-radius: 10px; font-weight: 700; font-size: 14px; border: none; cursor: pointer; font-family: 'Cairo', sans-serif; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
+    .btn-primary { background: var(--primary); color: #fff; } .btn-primary:hover { background: #1d4ed8; }
+    .btn-success { background: var(--success); color: #fff; } .btn-success:hover { background: #059669; }
+    .btn-danger { background: #fff; color: var(--danger); border: 1px solid var(--danger); } .btn-danger:hover { background: #fef2f2; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th { text-align: right; padding: 10px 8px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); }
+    td { padding: 12px 8px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .timer { direction: ltr; display: inline-block; font-weight: 700; color: var(--primary); background: #eff6ff; padding: 4px 12px; border-radius: 20px; }
+    .timer.expired { color: var(--danger); background: #fee2e2; }
+    .actions { display: flex; gap: 6px; }
+    .message { padding: 10px 14px; border-radius: 10px; margin-bottom: 16px; font-weight: 600; font-size: 13px; display: none; }
+    .message.success { background: #d1fae5; color: #065f46; display: block; }
+    .message.error { background: #fee2e2; color: #991b1b; display: block; }
+    .extend-popup { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 100; }
+    .extend-popup.open { display: flex; }
+    .popup-content { background: #fff; padding: 24px; border-radius: var(--radius); width: 300px; text-align: center; }
+    .popup-content input { width: 80px; padding: 8px; margin: 10px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1><i class="fa-solid fa-users-gear"></i> إدارة اشتراكات البائعين</h1>
+    <p>أضف بائعين جدد وتابع اشتراكاتهم بسهولة</p>
+  </div>
+
+  <div class="add-seller-card">
+    <h2 class="card-title"><i class="fa-solid fa-user-plus"></i> إضافة بائع جديد</h2>
+    <div class="form-row">
+      <div class="form-group"><label>الاسم</label><input type="text" id="name" placeholder="اسم البائع"></div>
+      <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="email" placeholder="example@gmail.com"></div>
+      <div class="form-group">
+        <label>المدة</label>
+        <select id="duration">
+          <option value="30">شهر واحد</option>
+          <option value="60">شهرين</option>
+          <option value="90">ثلاثة أشهر</option>
+          <option value="180">ستة أشهر</option>
+          <option value="365">سنة</option>
+        </select>
+      </div>
+      <div class="form-group" style="display:flex; align-items:flex-end;">
+        <button class="btn btn-primary" onclick="addSeller()"><i class="fa-solid fa-plus"></i> إضافة</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="message" id="message"></div>
+
+  <div class="sellers-card">
+    <h2 class="card-title"><i class="fa-solid fa-list-check"></i> البائعون الحاليون</h2>
+    <table id="sellers-table">
+      <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>تاريخ الانتهاء</th><th>الوقت المتبقي</th><th>إجراءات</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="extend-popup" id="extendPopup">
+  <div class="popup-content">
+    <h3>تمديد الاشتراك</h3>
+    <p>أدخل عدد الأيام الإضافية:</p>
+    <input type="number" id="extendDays" value="30" min="1">
+    <br><br>
+    <button class="btn btn-success btn-sm" onclick="confirmExtend()">تمديد</button>
+    <button class="btn btn-danger btn-sm" onclick="closeExtend()">إلغاء</button>
+  </div>
+</div>
+
+<script>
+  // التعديل الوحيد: استخدام مسار Netlify Function
+  const API_URL = '/api/manage-sellers';
+  let currentSellerId = null;
+
+  async function api(action, data = {}) {
+    data.action = action;
+    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
+    return await res.json();
+  }
+
+  // بقية الدوال بدون تغيير (loadSellers, renderSellers, updateTimers, addSeller, openExtend...)
+  // ... [نفس كود JavaScript السابق بالكامل] ...
+  async function loadSellers() {
+    const res = await api('list');
+    if (res.success) renderSellers(res.sellers);
+  }
+
+  function renderSellers(sellers) {
+    const tbody = document.querySelector('#sellers-table tbody');
+    tbody.innerHTML = '';
+    if (sellers.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);">لا يوجد بائعون بعد</td></tr>';
+      return;
+    }
+    sellers.forEach(s => {
+      const expiry = new Date(s.expiryDate);
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${s.name}</td>
+        <td dir="ltr" style="text-align:right;">${s.email}</td>
+        <td>${expiry.toLocaleDateString('ar-DZ')}</td>
+        <td><span class="timer" id="timer-${s.id}" data-expiry="${s.expiryDate}"></span></td>
+        <td class="actions">
+          <button class="btn btn-success btn-sm" onclick="openExtend('${s.id}')"><i class="fa-solid fa-clock"></i> تمديد</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteSeller('${s.id}')"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+    updateTimers();
+  }
+
+  function updateTimers() {
+    const now = new Date().getTime();
+    document.querySelectorAll('.timer').forEach(el => {
+      const expiry = new Date(el.dataset.expiry).getTime();
+      const diff = expiry - now;
+      if (diff <= 0) {
+        el.textContent = 'منتهي';
+        el.classList.add('expired');
+      } else {
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        el.textContent = `${days} يوم ${hours} ساعة`;
+        el.classList.remove('expired');
+      }
+    });
+  }
+
+  async function addSeller() {
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const duration = parseInt(document.getElementById('duration').value);
+    if (!name || !email) return showMessage('يرجى ملء جميع الحقول', 'error');
+    const res = await api('add', { name, email, durationDays: duration });
+    if (res.success) {
+      showMessage('تمت إضافة البائع بنجاح', 'success');
+      document.getElementById('name').value = '';
+      document.getElementById('email').value = '';
+      loadSellers();
+    } else {
+      showMessage(res.error || 'فشل الإضافة', 'error');
+    }
+  }
+
+  function openExtend(id) { currentSellerId = id; document.getElementById('extendPopup').classList.add('open'); }
+  function closeExtend() { document.getElementById('extendPopup').classList.remove('open'); currentSellerId = null; }
+
+  async function confirmExtend() {
+    const days = parseInt(document.getElementById('extendDays').value);
+    if (days < 1) return;
+    const res = await api('extend', { id: currentSellerId, additionalDays: days });
+    if (res.success) {
+      showMessage('تم تمديد الاشتراك', 'success');
+      closeExtend();
+      loadSellers();
+    } else { showMessage(res.error || 'فشل التمديد', 'error'); }
+  }
+
+  async function deleteSeller(id) {
+    if (!confirm('هل أنت متأكد من حذف هذا البائع؟')) return;
+    const res = await api('delete', { id });
+    if (res.success) { showMessage('تم الحذف', 'success'); loadSellers(); }
+    else { showMessage(res.error || 'فشل الحذف', 'error'); }
+  }
+
+  function showMessage(text, type) {
+    const msg = document.getElementById('message');
+    msg.textContent = text; msg.className = 'message ' + type;
+    setTimeout(() => { msg.className = 'message'; }, 4000);
+  }
+
+  setInterval(updateTimers, 60000);
+  window.onload = loadSellers;
+</script>
+</body>
+</html>
