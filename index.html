@@ -3,122 +3,175 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة تحكم البائعين - منصة إعلم</title>
+  <title>إدارة اشتراكات البائعين - منصة إعلم</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* ===== التصميم الأولاني (نفس الأنماط السابقة) ===== */
+    /* ===== المتغيرات والتصميم الأساسي ===== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     :root {
       --bg: #f1f5f9;
       --card: #ffffff;
       --primary: #2563eb;
-      --danger: #ef4444;
+      --primary-dark: #1d4ed8;
       --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
       --text: #0f172a;
       --muted: #64748b;
       --border: #e2e8f0;
       --radius: 14px;
+      --shadow: 0 4px 16px rgba(0,0,0,0.05);
     }
     body {
       font-family: 'Cairo', sans-serif;
       background: var(--bg);
-      margin: 0;
-      padding: 20px;
+      padding: 12px;
       direction: rtl;
+      color: var(--text);
     }
     .container {
       max-width: 1000px;
       margin: 0 auto;
     }
+
+    /* ===== الرأس ===== */
     .header {
       text-align: center;
-      margin: 30px 0;
+      margin: 20px 0 28px;
     }
     .header h1 {
-      font-size: 28px;
+      font-size: clamp(20px, 6vw, 28px);
       font-weight: 800;
-      color: var(--text);
-      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
     .header p {
       color: var(--muted);
-      margin-top: 8px;
+      font-size: clamp(13px, 3vw, 16px);
+      margin-top: 6px;
     }
-    .add-seller-card, .sellers-card {
+
+    /* ===== الإحصائيات ===== */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .stat {
       background: var(--card);
       border-radius: var(--radius);
-      padding: 24px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
-      margin-bottom: 24px;
+      padding: 14px 8px;
+      text-align: center;
       border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    .stat .n {
+      font-size: clamp(20px, 5vw, 28px);
+      font-weight: 800;
+    }
+    .stat .l {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .stat.s-ok .n { color: var(--success); }
+    .stat.s-err .n { color: var(--danger); }
+
+    /* ===== البطاقات ===== */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
     }
     .card-title {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 700;
-      margin: 0 0 16px;
       display: flex;
       align-items: center;
       gap: 8px;
+      margin-bottom: 14px;
     }
-    .form-row {
-      display: flex;
+    .card-title i { color: var(--primary); }
+
+    /* ===== نموذج الإضافة (متجاوب) ===== */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
-      flex-wrap: wrap;
-      align-items: flex-end;
     }
     .form-group {
-      flex: 1;
-      min-width: 150px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
     .form-group label {
-      display: block;
       font-size: 13px;
       font-weight: 600;
-      margin-bottom: 6px;
       color: var(--muted);
     }
     .form-group input,
     .form-group select {
-      width: 100%;
-      padding: 10px 14px;
+      padding: 10px 12px;
       border: 1px solid var(--border);
       border-radius: 10px;
       font-family: 'Cairo', sans-serif;
       font-size: 14px;
-      box-sizing: border-box;
       background: #f8fafc;
+      width: 100%;
+      transition: 0.2s;
     }
-    /* حقلان للأيام والساعات جنباً إلى جنب */
-    .form-group.duration-group {
+    .form-group input:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    }
+    /* حقل الأيام والساعات جنباً */
+    .duration-group {
       display: flex;
       gap: 8px;
     }
-    .form-group.duration-group > div {
+    .duration-group .form-group {
       flex: 1;
     }
-    .form-group.duration-group input {
-      width: 100%;
+    .full-width {
+      grid-column: 1 / -1;
     }
 
+    /* ===== الأزرار ===== */
     .btn {
-      padding: 10px 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 18px;
       border-radius: 10px;
       font-weight: 700;
       font-size: 14px;
       border: none;
       cursor: pointer;
       font-family: 'Cairo', sans-serif;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
       transition: 0.2s;
+      width: auto;
+      white-space: nowrap;
     }
     .btn-primary {
       background: var(--primary);
       color: #fff;
     }
     .btn-primary:hover {
-      background: #1d4ed8;
+      background: var(--primary-dark);
     }
     .btn-success {
       background: var(--success);
@@ -128,74 +181,115 @@
       background: #059669;
     }
     .btn-danger {
-      background: #fff;
-      color: var(--danger);
-      border: 1px solid var(--danger);
-    }
-    .btn-danger:hover {
-      background: #fef2f2;
-    }
-    .btn-warn {
-      background: #f59e0b;
+      background: var(--danger);
       color: #fff;
     }
-    .btn-warn:hover {
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+    .btn-warning {
+      background: var(--warning);
+      color: #fff;
+    }
+    .btn-warning:hover {
       background: #d97706;
     }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover {
+      background: var(--bg);
+    }
     .btn-sm {
-      padding: 6px 12px;
+      padding: 5px 10px;
       font-size: 12px;
     }
+    .btn-block {
+      width: 100%;
+      justify-content: center;
+    }
 
+    /* ===== الجدول (متجاوب بالتمرير) ===== */
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 0 -6px;
+      padding: 0 6px;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      min-width: 540px;
+      font-size: 14px;
     }
     th {
       text-align: right;
-      padding: 10px 8px;
+      padding: 10px 6px;
       font-size: 12px;
       color: var(--muted);
       border-bottom: 1px solid var(--border);
+      white-space: nowrap;
     }
     td {
-      padding: 12px 8px;
-      border-bottom: 1px solid var(--border);
-      font-size: 14px;
+      padding: 12px 6px;
+      border-bottom: 0.5px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    .seller-name {
+      font-weight: 700;
+    }
+    .seller-email {
+      font-size: 12px;
+      color: var(--muted);
+      direction: ltr;
+      text-align: right;
+    }
+    .expiry-date {
+      font-size: 12px;
+      white-space: nowrap;
     }
 
+    /* ===== مؤقت العد التنازلي ===== */
     .timer {
-      direction: ltr;
       display: inline-block;
       font-weight: 700;
-      color: var(--primary);
-      background: #eff6ff;
       padding: 4px 12px;
       border-radius: 20px;
+      font-size: 13px;
+      background: #eff6ff;
+      color: var(--primary);
+      white-space: nowrap;
     }
     .timer.expired {
-      color: var(--danger);
       background: #fee2e2;
+      color: var(--danger);
     }
-    .timer.warn {
-      color: #b45309;
+    .timer.warning {
       background: #fef3c7;
+      color: #b45309;
     }
 
+    /* ===== أزرار الإجراءات ===== */
     .actions {
       display: flex;
-      gap: 6px;
+      gap: 5px;
       flex-wrap: wrap;
     }
+    .actions .btn {
+      flex: 1 0 auto;
+      min-width: 44px;
+    }
 
-    /* رسالة منبثقة (toast) */
+    /* ===== الرسائل (toast) ===== */
     .message {
-      padding: 10px 14px;
+      padding: 12px 16px;
       border-radius: 10px;
-      margin-bottom: 16px;
       font-weight: 600;
       font-size: 13px;
+      margin-bottom: 16px;
       display: none;
     }
     .message.success {
@@ -209,247 +303,349 @@
       display: block;
     }
 
-    /* المودال (نافذة التمديد والإيميل) */
-    .extend-popup,
-    .email-popup {
+    /* ===== المودالات (متجاوبة) ===== */
+    .modal-overlay {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: 0;
       background: rgba(0,0,0,0.5);
       align-items: center;
       justify-content: center;
-      z-index: 100;
+      z-index: 1000;
+      padding: 16px;
     }
-    .extend-popup.open,
-    .email-popup.open {
+    .modal-overlay.open {
       display: flex;
     }
-    .popup-content {
+    .modal-box {
       background: #fff;
-      padding: 24px;
       border-radius: var(--radius);
-      width: 320px;
-      text-align: center;
+      padding: 24px 20px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
     }
-    .popup-content input[type="number"] {
-      width: 70px;
-      padding: 8px;
-      margin: 4px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-family: 'Cairo', sans-serif;
-      text-align: center;
+    .modal-box h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
     }
-    .popup-content .dur-row {
+    .modal-box p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .modal-box .duration-group {
       display: flex;
       gap: 10px;
-      justify-content: center;
-      margin: 10px 0;
+      margin-bottom: 16px;
     }
-    .popup-content .dur-row label {
-      font-size: 12px;
-      color: var(--muted);
+    .modal-box .duration-group .form-group {
+      flex: 1;
+    }
+    .modal-box .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+    .modal-box .modal-actions .btn {
+      flex: 1;
+      min-width: 80px;
     }
     .email-note {
       background: #fef3c7;
       border: 1px solid #f59e0b;
       border-radius: 8px;
-      padding: 10px;
-      font-size: 12px;
+      padding: 10px 14px;
+      font-size: 13px;
       color: #78350f;
-      margin: 12px 0;
+      margin-bottom: 14px;
       text-align: right;
     }
-    .modal-actions {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      margin-top: 16px;
-    }
-    .modal-actions .btn {
-      flex: 1;
-    }
-
-    /* إحصائيات بسيطة */
-    .stats {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-    .stat {
-      background: var(--card);
-      padding: 12px 20px;
-      border-radius: var(--radius);
+    .modal-box input[type="text"],
+    .modal-box input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
       border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 14px;
+      background: #f8fafc;
+    }
+    .modal-box input[type="number"] {
       text-align: center;
-      flex: 1;
     }
-    .stat .n {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--text);
-    }
-    .stat .l {
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .stat.s-ok .n { color: var(--success); }
-    .stat.s-err .n { color: var(--danger); }
 
-    /* خلو الجدول */
-    .empty {
+    /* ===== حالة عدم وجود بائعين ===== */
+    .empty-state {
       text-align: center;
-      padding: 32px;
+      padding: 30px 10px;
       color: var(--muted);
     }
-    .empty i {
-      font-size: 36px;
+    .empty-state i {
+      font-size: 40px;
+      opacity: 0.3;
       display: block;
       margin-bottom: 8px;
-      opacity: 0.4;
+    }
+
+    /* ===== تحسينات للشاشات الصغيرة ===== */
+    @media (max-width: 600px) {
+      body { padding: 8px; }
+      .header { margin: 12px 0 20px; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .stat:last-child { grid-column: span 2; }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .duration-group {
+        flex-wrap: nowrap;
+      }
+      .full-width { grid-column: 1; }
+
+      .btn-block-mobile {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .modal-box {
+        padding: 18px 16px;
+        max-width: 100%;
+        margin: 10px;
+      }
+      .modal-box .modal-actions .btn {
+        flex: 1 1 100%;
+      }
+      .actions .btn {
+        flex: 1 1 100%;
+        justify-content: center;
+      }
+      .timer {
+        font-size: 12px;
+        padding: 3px 8px;
+      }
+      table {
+        font-size: 13px;
+        min-width: 480px;
+      }
+      th, td {
+        padding: 8px 4px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+      .stat:last-child { grid-column: 1; }
+      .duration-group {
+        flex-direction: column;
+        gap: 6px;
+      }
+      .modal-box .duration-group {
+        flex-direction: column;
+        gap: 6px;
+      }
     }
   </style>
 </head>
 <body>
 <div class="container">
-  <!-- الرأس -->
+
+  <!-- ===== الرأس ===== -->
   <div class="header">
     <h1><i class="fa-solid fa-users-gear"></i> إدارة اشتراكات البائعين</h1>
     <p>أضف بائعين جدد وتابع اشتراكاتهم بسهولة</p>
   </div>
 
-  <!-- الإحصائيات -->
+  <!-- ===== الإحصائيات ===== -->
   <div class="stats">
     <div class="stat"><div class="n" id="sTotal">0</div><div class="l">إجمالي البائعين</div></div>
     <div class="stat s-ok"><div class="n" id="sActive">0</div><div class="l">نشط</div></div>
     <div class="stat s-err"><div class="n" id="sExp">0</div><div class="l">منتهي</div></div>
   </div>
 
-  <!-- رسالة -->
+  <!-- ===== رسائل ===== -->
   <div class="message" id="message"></div>
 
-  <!-- إضافة بائع جديد -->
-  <div class="add-seller-card">
-    <h2 class="card-title"><i class="fa-solid fa-user-plus"></i> إضافة بائع جديد</h2>
-    <div class="form-row">
-      <div class="form-group"><label>الاسم</label><input type="text" id="iName" placeholder="اسم البائع"></div>
-      <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="iEmail" placeholder="example@gmail.com" dir="ltr" style="text-align:right;"></div>
-      <div class="form-group duration-group">
-        <div><label>أيام</label><input type="number" id="iDays" value="30" min="0"></div>
-        <div><label>ساعات</label><input type="number" id="iHours" value="0" min="0" max="23"></div>
+  <!-- ===== إضافة بائع ===== -->
+  <div class="card">
+    <div class="card-title"><i class="fa-solid fa-user-plus"></i> إضافة بائع جديد</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>الاسم الكامل</label>
+        <input type="text" id="iName" placeholder="أحمد بن علي">
       </div>
-      <div class="form-group" style="display:flex; align-items:flex-end;">
-        <button class="btn btn-primary" onclick="addSeller()"><i class="fa-solid fa-plus"></i> إضافة</button>
+      <div class="form-group">
+        <label>البريد الإلكتروني</label>
+        <input type="email" id="iEmail" placeholder="seller@example.com" dir="ltr" style="text-align:right;">
+      </div>
+      <div class="form-group full-width">
+        <label>مدة الاشتراك</label>
+        <div class="duration-group">
+          <div class="form-group">
+            <label style="font-size:12px;font-weight:400;">أيام</label>
+            <input type="number" id="iDays" value="30" min="0">
+          </div>
+          <div class="form-group">
+            <label style="font-size:12px;font-weight:400;">ساعات</label>
+            <input type="number" id="iHours" value="0" min="0" max="23">
+          </div>
+        </div>
+      </div>
+      <div class="form-group full-width">
+        <button class="btn btn-primary btn-block btn-block-mobile" onclick="addSeller()">
+          <i class="fa-solid fa-plus"></i> إضافة بائع
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- قائمة البائعين -->
-  <div class="sellers-card">
-    <h2 class="card-title"><i class="fa-solid fa-list-check"></i> البائعون الحاليون</h2>
-    <table id="sellers-table">
-      <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>تاريخ الانتهاء</th><th>الوقت المتبقي</th><th>إجراءات</th></tr></thead>
-      <tbody id="tbody"></tbody>
-    </table>
+  <!-- ===== قائمة البائعين ===== -->
+  <div class="card">
+    <div class="card-title"><i class="fa-solid fa-list-check"></i> البائعون الحاليون</div>
+    <div class="table-responsive">
+      <table id="sellers-table">
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>البريد</th>
+            <th>تاريخ الانتهاء</th>
+            <th>الوقت المتبقي</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
-<!-- مودال تمديد الاشتراك -->
-<div class="extend-popup" id="extOverlay">
-  <div class="popup-content">
+<!-- ===== مودال تمديد الاشتراك ===== -->
+<div class="modal-overlay" id="extOverlay">
+  <div class="modal-box">
     <h3>تمديد الاشتراك</h3>
-    <p>أدخل المدة الإضافية:</p>
-    <div class="dur-row">
-      <div><label>أيام</label><input type="number" id="eDays" value="30" min="0"></div>
-      <div><label>ساعات</label><input type="number" id="eHours" value="0" min="0" max="23"></div>
+    <p>أضف مدة إضافية للبائع</p>
+    <div class="duration-group">
+      <div class="form-group">
+        <label style="font-size:12px;">أيام</label>
+        <input type="number" id="eDays" value="30" min="0">
+      </div>
+      <div class="form-group">
+        <label style="font-size:12px;">ساعات</label>
+        <input type="number" id="eHours" value="0" min="0" max="23">
+      </div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-danger btn-sm" onclick="closeModal('extOverlay')">إلغاء</button>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('extOverlay')">إلغاء</button>
       <button class="btn btn-success btn-sm" onclick="confirmExtend()">تمديد</button>
     </div>
   </div>
 </div>
 
-<!-- مودال إرسال الإيميل -->
-<div class="email-popup" id="emailOverlay">
-  <div class="popup-content">
+<!-- ===== مودال إرسال إيميل انتهاء ===== -->
+<div class="modal-overlay" id="emailOverlay">
+  <div class="modal-box">
     <h3>إرسال إشعار انتهاء الاشتراك</h3>
-    <p>سيتم إرسال بريد إلكتروني للبائع يُعلمه بانتهاء تجربته المجانية</p>
+    <p>سيُرسل بريد إلكتروني للبائع يُعلمه بانتهاء تجربته المجانية</p>
     <div class="email-note">
-      ⚠️ سيعلم البائع أن متجره لا يزال موجوداً لكنه لن يتمكن من التعديل عليه حتى يُجدد اشتراكه.
+      ⚠️ متجره يبقى موجوداً لكنه لن يتمكن من التعديل أو استقبال طلبات جديدة حتى يجدد.
     </div>
-    <div style="margin:12px 0;text-align:right;">
-      <label style="font-size:13px;font-weight:600;color:var(--muted);">اسأل البائع عن تجربته (اختياري)</label>
-      <input type="text" id="eFeedbackQ" placeholder="مثال: كيف كانت تجربتك مع المنصة؟" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-top:4px;">
+    <div class="form-group" style="margin-bottom:14px;">
+      <label style="font-size:13px;font-weight:600;color:var(--muted);">سؤال اختياري للبائع</label>
+      <input type="text" id="eFeedbackQ" placeholder="مثال: كيف كانت تجربتك مع المنصة؟">
     </div>
     <div class="modal-actions">
-      <button class="btn btn-danger btn-sm" onclick="closeModal('emailOverlay')">إلغاء</button>
-      <button class="btn btn-warn btn-sm" onclick="confirmSendEmail()">إرسال الإيميل</button>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('emailOverlay')">إلغاء</button>
+      <button class="btn btn-warning btn-sm" onclick="confirmSendEmail()">📧 إرسال</button>
     </div>
   </div>
 </div>
 
 <script>
-  // ============= دوال API والتحكم =============
+  // ============================================================
+  // كل الدوال والمنطق (نفس الكود السابق مع دعم الأيام والساعات)
+  // ============================================================
   const API_URL = '/api/manage-sellers';
   let sellers = [];
   let currentId = null;
 
+  // ----- الاتصال بالـ API -----
   async function api(action, data = {}) {
     data.action = action;
     try {
-      const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
+      const r = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
       return await r.json();
-    } catch (e) { return { success: false, error: 'خطأ في الاتصال' }; }
+    } catch (e) {
+      return { success: false, error: 'خطأ في الاتصال بالخادم' };
+    }
   }
 
+  // ----- تحميل البائعين -----
   async function loadSellers() {
     const r = await api('list');
-    if (r.success) { sellers = r.sellers || []; render(); }
+    if (r.success) {
+      sellers = r.sellers || [];
+      render();
+    } else {
+      showMessage(r.error || 'فشل تحميل البائعين', 'error');
+    }
   }
 
+  // ----- عرض الجدول والإحصائيات -----
   function render() {
     const now = Date.now();
-    let active = 0, exp = 0;
+    let active = 0,
+      expired = 0;
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
+
     if (!sellers.length) {
-      tbody.innerHTML = '<tr><td colspan="5"><div class="empty"><i>🛒</i>لا يوجد بائعون بعد</div></td></tr>';
-      updateStats(0,0,0);
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><i>🛒</i>لا يوجد بائعون بعد</div></td></tr>`;
+      updateStats(0, 0, 0);
       return;
     }
+
     sellers.forEach(s => {
       const ex = new Date(s.expiryDate);
       const diff = ex - now;
-      if (diff > 0) active++; else exp++;
+      if (diff > 0) active++;
+      else expired++;
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td><strong>${s.name}</strong></td>
-        <td dir="ltr" style="text-align:right;font-size:13px;color:var(--muted);">${s.email}</td>
-        <td>${ex.toLocaleDateString('ar-DZ')} ${ex.toLocaleTimeString('ar-DZ', {hour:'2-digit', minute:'2-digit'})}</td>
-        <td><span class="timer ${diff<=0?'expired':diff<86400000?'warn':''}" id="timer-${s.id}" data-expiry="${s.expiryDate}"></span></td>
-        <td class="actions">
-          <button class="btn btn-success btn-sm" onclick="openExt('${s.id}')"><i class="fa-solid fa-clock"></i> تمديد</button>
-          <button class="btn btn-warn btn-sm" onclick="openEmail('${s.id}')"><i class="fa-solid fa-envelope"></i></button>
-          <button class="btn btn-danger btn-sm" onclick="del('${s.id}')"><i class="fa-solid fa-trash"></i></button>
+        <td class="seller-name">${s.name}</td>
+        <td class="seller-email">${s.email}</td>
+        <td class="expiry-date">${ex.toLocaleDateString('ar-DZ')} ${ex.toLocaleTimeString('ar-DZ', {hour:'2-digit', minute:'2-digit'})}</td>
+        <td><span class="timer ${diff<=0?'expired':diff<86400000?'warning':''}" id="timer-${s.id}" data-expiry="${s.expiryDate}"></span></td>
+        <td>
+          <div class="actions">
+            <button class="btn btn-success btn-sm" onclick="openExt('${s.id}')"><i class="fa-regular fa-clock"></i></button>
+            <button class="btn btn-warning btn-sm" onclick="openEmail('${s.id}')"><i class="fa-regular fa-envelope"></i></button>
+            <button class="btn btn-danger btn-sm" onclick="del('${s.id}')"><i class="fa-regular fa-trash-can"></i></button>
+          </div>
         </td>
       `;
       tbody.appendChild(tr);
     });
-    updateStats(sellers.length, active, exp);
+
+    updateStats(sellers.length, active, expired);
     updateTimers();
   }
 
-  function updateStats(t, a, e) {
-    document.getElementById('sTotal').textContent = t;
-    document.getElementById('sActive').textContent = a;
-    document.getElementById('sExp').textContent = e;
+  function updateStats(total, active, expired) {
+    document.getElementById('sTotal').textContent = total;
+    document.getElementById('sActive').textContent = active;
+    document.getElementById('sExp').textContent = expired;
   }
 
+  // ----- تحديث العد التنازلي -----
   function updateTimers() {
     const now = Date.now();
     document.querySelectorAll('.timer').forEach(el => {
@@ -459,28 +655,30 @@
         el.textContent = 'منتهي';
         el.className = 'timer expired';
       } else {
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const days = Math.floor(diff / 86400000);
+        const hours = Math.floor((diff % 86400000) / 3600000);
+        const minutes = Math.floor((diff % 3600000) / 60000);
         let txt = '';
         if (days > 0) txt += days + ' يوم ';
         if (hours > 0) txt += hours + ' ساعة ';
         txt += minutes + ' دقيقة';
         el.textContent = txt;
-        el.className = 'timer' + (diff < 86400000 ? ' warn' : '');
+        el.className = 'timer' + (diff < 86400000 ? ' warning' : '');
       }
     });
   }
 
-  // ============= الإضافة والتمديد (بالأيام والساعات) =============
+  // ----- إضافة بائع -----
   async function addSeller() {
     const name = document.getElementById('iName').value.trim();
     const email = document.getElementById('iEmail').value.trim();
-    const days = +document.getElementById('iDays').value || 0;
-    const hours = +document.getElementById('iHours').value || 0;
-    if (!name || !email) return showMessage('يرجى ملء جميع الحقول', 'error');
+    const days = parseInt(document.getElementById('iDays').value) || 0;
+    const hours = parseInt(document.getElementById('iHours').value) || 0;
+
+    if (!name || !email) return showMessage('يرجى تعبئة الاسم والبريد', 'error');
     if (days === 0 && hours === 0) return showMessage('حدد مدة أكبر من صفر', 'error');
-    const durationDays = days + (hours / 24);
+
+    const durationDays = days + hours / 24;
     const r = await api('add', { name, email, durationDays });
     if (r.success) {
       showMessage('تمت إضافة البائع بنجاح ✅', 'success');
@@ -489,66 +687,90 @@
       document.getElementById('iDays').value = 30;
       document.getElementById('iHours').value = 0;
       loadSellers();
-    } else showMessage(r.error || 'فشل الإضافة', 'error');
+    } else {
+      showMessage(r.error || 'فشل الإضافة', 'error');
+    }
   }
 
-  function openExt(id) { currentId = id; document.getElementById('extOverlay').classList.add('open'); }
-  function closeModal(id) { document.getElementById(id).classList.remove('open'); currentId = null; }
+  // ----- فتح وإغلاق المودالات -----
+  function openExt(id) {
+    currentId = id;
+    document.getElementById('extOverlay').classList.add('open');
+  }
+  function openEmail(id) {
+    currentId = id;
+    document.getElementById('eFeedbackQ').value = '';
+    document.getElementById('emailOverlay').classList.add('open');
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+    currentId = null;
+  }
 
+  // ----- تأكيد التمديد -----
   async function confirmExtend() {
-    const days = +document.getElementById('eDays').value || 0;
-    const hours = +document.getElementById('eHours').value || 0;
+    const days = parseInt(document.getElementById('eDays').value) || 0;
+    const hours = parseInt(document.getElementById('eHours').value) || 0;
     if (days === 0 && hours === 0) return showMessage('أدخل مدة أكبر من صفر', 'error');
-    const additionalDays = days + (hours / 24);
+
+    const additionalDays = days + hours / 24;
     const r = await api('extend', { id: currentId, additionalDays });
     if (r.success) {
       showMessage('تم تمديد الاشتراك ✅', 'success');
       closeModal('extOverlay');
       loadSellers();
-    } else showMessage(r.error || 'فشل التمديد', 'error');
+    } else {
+      showMessage(r.error || 'فشل التمديد', 'error');
+    }
   }
 
-  // ============= الإيميل والحذف =============
-  function openEmail(id) { currentId = id; document.getElementById('eFeedbackQ').value = ''; document.getElementById('emailOverlay').classList.add('open'); }
-
+  // ----- تأكيد إرسال الإيميل -----
   async function confirmSendEmail() {
-    const s = sellers.find(x => x.id == currentId);
-    if (!s) return;
+    const seller = sellers.find(s => s.id === currentId);
+    if (!seller) return showMessage('البائع غير موجود', 'error');
+
     const feedback = document.getElementById('eFeedbackQ').value.trim();
-    const r = await api('sendExpiryEmail', { id: currentId, email: s.email, name: s.name, feedbackQuestion: feedback });
+    const r = await api('sendExpiryEmail', {
+      id: currentId,
+      email: seller.email,
+      name: seller.name,
+      feedbackQuestion: feedback,
+    });
     if (r.success) {
       showMessage('تم إرسال الإيميل بنجاح 📧', 'success');
       closeModal('emailOverlay');
-    } else showMessage(r.error || 'فشل الإرسال', 'error');
+    } else {
+      showMessage(r.error || 'فشل الإرسال', 'error');
+    }
   }
 
+  // ----- حذف بائع -----
   async function del(id) {
-    if (!confirm('هل أنت متأكد من حذف هذا البائع؟')) return;
+    if (!confirm('هل أنت متأكد من حذف هذا البائع نهائياً؟')) return;
     const r = await api('delete', { id });
-    if (r.success) { showMessage('تم الحذف', 'success'); loadSellers(); }
-    else showMessage(r.error || 'فشل الحذف', 'error');
+    if (r.success) {
+      showMessage('تم الحذف بنجاح', 'success');
+      loadSellers();
+    } else {
+      showMessage(r.error || 'فشل الحذف', 'error');
+    }
   }
 
-  // ============= عرض الرسائل =============
+  // ----- عرض الرسائل -----
   function showMessage(text, type) {
-    const msg = document.getElementById('message');
-    msg.textContent = text;
-    msg.className = 'message ' + type;
-    clearTimeout(msg._timer);
-    msg._timer = setTimeout(() => { msg.className = 'message'; }, 4000);
+    const el = document.getElementById('message');
+    el.textContent = text;
+    el.className = 'message ' + type;
+    clearTimeout(el._timer);
+    el._timer = setTimeout(() => { el.className = 'message'; }, 5000);
   }
 
-  // تحديث العد التنازلي كل دقيقة
-  setInterval(updateTimers, 60000);
-  window.onload = loadSellers;
+  // ----- تحديث تلقائي كل 30 ثانية -----
+  setInterval(updateTimers, 30000);
 
-  // بيانات تجريبية للعرض (سيتم استبدالها من API)
-  sellers = [
-    { id: '1', name: 'أحمد بن علي', email: 'ahmed@example.com', expiryDate: new Date(Date.now() + 5 * 86400000).toISOString() },
-    { id: '2', name: 'فاطمة الزهراء', email: 'fatima@shop.dz', expiryDate: new Date(Date.now() + 18 * 3600000).toISOString() },
-    { id: '3', name: 'يوسف بلحسن', email: 'youssef@store.dz', expiryDate: new Date(Date.now() - 2 * 86400000).toISOString() },
-  ];
-  render();
+  // ----- تحميل البيانات عند بدء التشغيل -----
+  window.onload = loadSellers;
 </script>
+
 </body>
 </html>
