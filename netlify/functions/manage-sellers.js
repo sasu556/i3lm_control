@@ -24,6 +24,10 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body);
     body.apiKey = 'ealam2026secure';
 
+    // ==== تحويل الأرقام العشرية (للتأكد من أنها أرقام) ====
+    if (body.durationDays !== undefined) body.durationDays = parseFloat(body.durationDays);
+    if (body.additionalDays !== undefined) body.additionalDays = parseFloat(body.additionalDays);
+
     const response = await fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
