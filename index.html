@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- نفس محتوى head السابق دون تغيير -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة تحكم البائعين - منصة إعلم</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* نفس الأنماط السابقة بالكامل */
+    /* نفس الأنماط السابقة – لم تتغير */
     :root { --bg: #f1f5f9; --card: #ffffff; --primary: #2563eb; --danger: #ef4444; --success: #10b981; --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --radius: 14px; }
     body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding: 20px; direction: rtl; }
     .container { max-width: 1000px; margin: 0 auto; }
@@ -21,6 +20,9 @@
     .form-group { flex: 1; min-width: 150px; }
     .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--muted); }
     .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-family: 'Cairo', sans-serif; font-size: 14px; box-sizing: border-box; background: #f8fafc; }
+    /* حقلان جنباً إلى جنب */
+    .form-group.duration-group { display: flex; gap: 8px; }
+    .form-group.duration-group input { flex: 1; }
     .btn { padding: 10px 22px; border-radius: 10px; font-weight: 700; font-size: 14px; border: none; cursor: pointer; font-family: 'Cairo', sans-serif; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
     .btn-primary { background: var(--primary); color: #fff; } .btn-primary:hover { background: #1d4ed8; }
     .btn-success { background: var(--success); color: #fff; } .btn-success:hover { background: #059669; }
@@ -37,8 +39,10 @@
     .message.error { background: #fee2e2; color: #991b1b; display: block; }
     .extend-popup { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 100; }
     .extend-popup.open { display: flex; }
-    .popup-content { background: #fff; padding: 24px; border-radius: var(--radius); width: 300px; text-align: center; }
-    .popup-content input { width: 80px; padding: 8px; margin: 10px; }
+    .popup-content { background: #fff; padding: 24px; border-radius: var(--radius); width: 320px; text-align: center; }
+    .popup-content .duration-group { display: flex; gap: 8px; justify-content: center; margin: 10px 0; }
+    .popup-content .duration-group input { width: 70px; padding: 8px; text-align: center; }
+    .popup-content .duration-group label { font-size: 13px; }
   </style>
 </head>
 <body>
@@ -53,15 +57,9 @@
     <div class="form-row">
       <div class="form-group"><label>الاسم</label><input type="text" id="name" placeholder="اسم البائع"></div>
       <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="email" placeholder="example@gmail.com"></div>
-      <div class="form-group">
-        <label>المدة</label>
-        <select id="duration">
-          <option value="30">شهر واحد</option>
-          <option value="60">شهرين</option>
-          <option value="90">ثلاثة أشهر</option>
-          <option value="180">ستة أشهر</option>
-          <option value="365">سنة</option>
-        </select>
+      <div class="form-group duration-group">
+        <div><label>أيام</label><input type="number" id="durationDays" value="30" min="0"></div>
+        <div><label>ساعات</label><input type="number" id="durationHours" value="0" min="0" max="23"></div>
       </div>
       <div class="form-group" style="display:flex; align-items:flex-end;">
         <button class="btn btn-primary" onclick="addSeller()"><i class="fa-solid fa-plus"></i> إضافة</button>
@@ -83,16 +81,18 @@
 <div class="extend-popup" id="extendPopup">
   <div class="popup-content">
     <h3>تمديد الاشتراك</h3>
-    <p>أدخل عدد الأيام الإضافية:</p>
-    <input type="number" id="extendDays" value="30" min="1">
-    <br><br>
+    <p>أدخل المدة الإضافية:</p>
+    <div class="duration-group">
+      <div><label>أيام</label><input type="number" id="extendDays" value="30" min="0"></div>
+      <div><label>ساعات</label><input type="number" id="extendHours" value="0" min="0" max="23"></div>
+    </div>
+    <br>
     <button class="btn btn-success btn-sm" onclick="confirmExtend()">تمديد</button>
     <button class="btn btn-danger btn-sm" onclick="closeExtend()">إلغاء</button>
   </div>
 </div>
 
 <script>
-  // التعديل الوحيد: استخدام مسار Netlify Function
   const API_URL = '/api/manage-sellers';
   let currentSellerId = null;
 
@@ -102,8 +102,6 @@
     return await res.json();
   }
 
-  // بقية الدوال بدون تغيير (loadSellers, renderSellers, updateTimers, addSeller, openExtend...)
-  // ... [نفس كود JavaScript السابق بالكامل] ...
   async function loadSellers() {
     const res = await api('list');
     if (res.success) renderSellers(res.sellers);
@@ -122,7 +120,7 @@
       row.innerHTML = `
         <td>${s.name}</td>
         <td dir="ltr" style="text-align:right;">${s.email}</td>
-        <td>${expiry.toLocaleDateString('ar-DZ')}</td>
+        <td>${expiry.toLocaleDateString('ar-DZ')} ${expiry.toLocaleTimeString('ar-DZ', {hour:'2-digit', minute:'2-digit'})}</td>
         <td><span class="timer" id="timer-${s.id}" data-expiry="${s.expiryDate}"></span></td>
         <td class="actions">
           <button class="btn btn-success btn-sm" onclick="openExtend('${s.id}')"><i class="fa-solid fa-clock"></i> تمديد</button>
@@ -145,7 +143,8 @@
       } else {
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        el.textContent = `${days} يوم ${hours} ساعة`;
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        el.textContent = `${days} يوم ${hours} ساعة ${minutes} دقيقة`;
         el.classList.remove('expired');
       }
     });
@@ -154,13 +153,19 @@
   async function addSeller() {
     const name = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim();
-    const duration = parseInt(document.getElementById('duration').value);
+    const days = parseInt(document.getElementById('durationDays').value) || 0;
+    const hours = parseInt(document.getElementById('durationHours').value) || 0;
     if (!name || !email) return showMessage('يرجى ملء جميع الحقول', 'error');
-    const res = await api('add', { name, email, durationDays: duration });
+    if (days === 0 && hours === 0) return showMessage('يجب تحديد مدة أكبر من صفر', 'error');
+    // حساب المدة الكلية بالأيام (كعدد عشري)
+    const durationDays = days + (hours / 24);
+    const res = await api('add', { name, email, durationDays });
     if (res.success) {
       showMessage('تمت إضافة البائع بنجاح', 'success');
       document.getElementById('name').value = '';
       document.getElementById('email').value = '';
+      document.getElementById('durationDays').value = 30;
+      document.getElementById('durationHours').value = 0;
       loadSellers();
     } else {
       showMessage(res.error || 'فشل الإضافة', 'error');
@@ -171,9 +176,11 @@
   function closeExtend() { document.getElementById('extendPopup').classList.remove('open'); currentSellerId = null; }
 
   async function confirmExtend() {
-    const days = parseInt(document.getElementById('extendDays').value);
-    if (days < 1) return;
-    const res = await api('extend', { id: currentSellerId, additionalDays: days });
+    const days = parseInt(document.getElementById('extendDays').value) || 0;
+    const hours = parseInt(document.getElementById('extendHours').value) || 0;
+    if (days === 0 && hours === 0) return showMessage('أدخل مدة أكبر من صفر', 'error');
+    const additionalDays = days + (hours / 24);
+    const res = await api('extend', { id: currentSellerId, additionalDays });
     if (res.success) {
       showMessage('تم تمديد الاشتراك', 'success');
       closeExtend();
