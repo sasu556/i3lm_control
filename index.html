@@ -1,208 +1,109 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة تحكم البائعين - منصة إعلم</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    /* نفس الأنماط السابقة – لم تتغير */
-    :root { --bg: #f1f5f9; --card: #ffffff; --primary: #2563eb; --danger: #ef4444; --success: #10b981; --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --radius: 14px; }
-    body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding: 20px; direction: rtl; }
-    .container { max-width: 1000px; margin: 0 auto; }
-    .header { text-align: center; margin: 30px 0; }
-    .header h1 { font-size: 28px; font-weight: 800; color: var(--text); margin: 0; }
-    .header p { color: var(--muted); margin-top: 8px; }
-    .add-seller-card, .sellers-card { background: var(--card); border-radius: var(--radius); padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); margin-bottom: 24px; border: 1px solid var(--border); }
-    .card-title { font-size: 18px; font-weight: 700; margin: 0 0 16px; display: flex; align-items: center; gap: 8px; }
-    .form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
-    .form-group { flex: 1; min-width: 150px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--muted); }
-    .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-family: 'Cairo', sans-serif; font-size: 14px; box-sizing: border-box; background: #f8fafc; }
-    /* حقلان جنباً إلى جنب */
-    .form-group.duration-group { display: flex; gap: 8px; }
-    .form-group.duration-group input { flex: 1; }
-    .btn { padding: 10px 22px; border-radius: 10px; font-weight: 700; font-size: 14px; border: none; cursor: pointer; font-family: 'Cairo', sans-serif; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
-    .btn-primary { background: var(--primary); color: #fff; } .btn-primary:hover { background: #1d4ed8; }
-    .btn-success { background: var(--success); color: #fff; } .btn-success:hover { background: #059669; }
-    .btn-danger { background: #fff; color: var(--danger); border: 1px solid var(--danger); } .btn-danger:hover { background: #fef2f2; }
-    .btn-sm { padding: 6px 12px; font-size: 12px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th { text-align: right; padding: 10px 8px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); }
-    td { padding: 12px 8px; border-bottom: 1px solid var(--border); font-size: 14px; }
-    .timer { direction: ltr; display: inline-block; font-weight: 700; color: var(--primary); background: #eff6ff; padding: 4px 12px; border-radius: 20px; }
-    .timer.expired { color: var(--danger); background: #fee2e2; }
-    .actions { display: flex; gap: 6px; }
-    .message { padding: 10px 14px; border-radius: 10px; margin-bottom: 16px; font-weight: 600; font-size: 13px; display: none; }
-    .message.success { background: #d1fae5; color: #065f46; display: block; }
-    .message.error { background: #fee2e2; color: #991b1b; display: block; }
-    .extend-popup { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 100; }
-    .extend-popup.open { display: flex; }
-    .popup-content { background: #fff; padding: 24px; border-radius: var(--radius); width: 320px; text-align: center; }
-    .popup-content .duration-group { display: flex; gap: 8px; justify-content: center; margin: 10px 0; }
-    .popup-content .duration-group input { width: 70px; padding: 8px; text-align: center; }
-    .popup-content .duration-group label { font-size: 13px; }
-  </style>
-</head>
-<body>
-<div class="container">
-  <div class="header">
-    <h1><i class="fa-solid fa-users-gear"></i> إدارة اشتراكات البائعين</h1>
-    <p>أضف بائعين جدد وتابع اشتراكاتهم بسهولة</p>
-  </div>
+// Google Apps Script - Code.gs
+const SHEET_NAME = 'Sellers';
+const OWNER_EMAIL = 'samifiree4@gmail.com';
+const API_KEY = 'ealam2026secure'; // يجب أن يتطابق مع المفتاح في دالة Netlify
 
-  <div class="add-seller-card">
-    <h2 class="card-title"><i class="fa-solid fa-user-plus"></i> إضافة بائع جديد</h2>
-    <div class="form-row">
-      <div class="form-group"><label>الاسم</label><input type="text" id="name" placeholder="اسم البائع"></div>
-      <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="email" placeholder="example@gmail.com"></div>
-      <div class="form-group duration-group">
-        <div><label>أيام</label><input type="number" id="durationDays" value="30" min="0"></div>
-        <div><label>ساعات</label><input type="number" id="durationHours" value="0" min="0" max="23"></div>
-      </div>
-      <div class="form-group" style="display:flex; align-items:flex-end;">
-        <button class="btn btn-primary" onclick="addSeller()"><i class="fa-solid fa-plus"></i> إضافة</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="message" id="message"></div>
-
-  <div class="sellers-card">
-    <h2 class="card-title"><i class="fa-solid fa-list-check"></i> البائعون الحاليون</h2>
-    <table id="sellers-table">
-      <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>تاريخ الانتهاء</th><th>الوقت المتبقي</th><th>إجراءات</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
-
-<div class="extend-popup" id="extendPopup">
-  <div class="popup-content">
-    <h3>تمديد الاشتراك</h3>
-    <p>أدخل المدة الإضافية:</p>
-    <div class="duration-group">
-      <div><label>أيام</label><input type="number" id="extendDays" value="30" min="0"></div>
-      <div><label>ساعات</label><input type="number" id="extendHours" value="0" min="0" max="23"></div>
-    </div>
-    <br>
-    <button class="btn btn-success btn-sm" onclick="confirmExtend()">تمديد</button>
-    <button class="btn btn-danger btn-sm" onclick="closeExtend()">إلغاء</button>
-  </div>
-</div>
-
-<script>
-  const API_URL = '/api/manage-sellers';
-  let currentSellerId = null;
-
-  async function api(action, data = {}) {
-    data.action = action;
-    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
-    return await res.json();
+function getSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_NAME);
+    sheet.appendRow(['ID', 'Name', 'Email', 'StartDate', 'DurationDays', 'ExpiryDate']);
   }
+  return sheet;
+}
 
-  async function loadSellers() {
-    const res = await api('list');
-    if (res.success) renderSellers(res.sellers);
-  }
-
-  function renderSellers(sellers) {
-    const tbody = document.querySelector('#sellers-table tbody');
-    tbody.innerHTML = '';
-    if (sellers.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);">لا يوجد بائعون بعد</td></tr>';
-      return;
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    if (data.apiKey !== API_KEY) {
+      return ContentService.createTextOutput(JSON.stringify({success: false, error: 'Unauthorized'}))
+        .setMimeType(ContentService.MimeType.JSON);
     }
-    sellers.forEach(s => {
-      const expiry = new Date(s.expiryDate);
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${s.name}</td>
-        <td dir="ltr" style="text-align:right;">${s.email}</td>
-        <td>${expiry.toLocaleDateString('ar-DZ')} ${expiry.toLocaleTimeString('ar-DZ', {hour:'2-digit', minute:'2-digit'})}</td>
-        <td><span class="timer" id="timer-${s.id}" data-expiry="${s.expiryDate}"></span></td>
-        <td class="actions">
-          <button class="btn btn-success btn-sm" onclick="openExtend('${s.id}')"><i class="fa-solid fa-clock"></i> تمديد</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteSeller('${s.id}')"><i class="fa-solid fa-trash"></i></button>
-        </td>
-      `;
-      tbody.appendChild(row);
-    });
-    updateTimers();
+    const sheet = getSheet_();
+    switch (data.action) {
+      case 'add': return addSeller_(sheet, data);
+      case 'extend': return extendSeller_(sheet, data);
+      case 'delete': return deleteSeller_(sheet, data);
+      case 'list': return listSellers_(sheet);
+      default: return respond_({success: false, error: 'Invalid action'});
+    }
+  } catch (err) {
+    return respond_({success: false, error: err.message});
   }
+}
 
-  function updateTimers() {
-    const now = new Date().getTime();
-    document.querySelectorAll('.timer').forEach(el => {
-      const expiry = new Date(el.dataset.expiry).getTime();
-      const diff = expiry - now;
-      if (diff <= 0) {
-        el.textContent = 'منتهي';
-        el.classList.add('expired');
-      } else {
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        el.textContent = `${days} يوم ${hours} ساعة ${minutes} دقيقة`;
-        el.classList.remove('expired');
-      }
-    });
-  }
+function addSeller_(sheet, data) {
+  const { name, email, durationDays } = data;
+  const startDate = new Date();
+  const expiryDate = new Date(startDate.getTime() + durationDays * 24 * 60 * 60 * 1000);
+  const id = Utilities.getUuid();
+  sheet.appendRow([id, name, email, startDate, durationDays, expiryDate]);
+  return respond_({success: true});
+}
 
-  async function addSeller() {
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const days = parseInt(document.getElementById('durationDays').value) || 0;
-    const hours = parseInt(document.getElementById('durationHours').value) || 0;
-    if (!name || !email) return showMessage('يرجى ملء جميع الحقول', 'error');
-    if (days === 0 && hours === 0) return showMessage('يجب تحديد مدة أكبر من صفر', 'error');
-    // حساب المدة الكلية بالأيام (كعدد عشري)
-    const durationDays = days + (hours / 24);
-    const res = await api('add', { name, email, durationDays });
-    if (res.success) {
-      showMessage('تمت إضافة البائع بنجاح', 'success');
-      document.getElementById('name').value = '';
-      document.getElementById('email').value = '';
-      document.getElementById('durationDays').value = 30;
-      document.getElementById('durationHours').value = 0;
-      loadSellers();
-    } else {
-      showMessage(res.error || 'فشل الإضافة', 'error');
+function extendSeller_(sheet, data) {
+  const { id, additionalDays } = data;
+  const rows = sheet.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if (rows[i][0] === id) {
+      const currentExpiry = new Date(rows[i][5]);
+      const newExpiry = new Date(currentExpiry.getTime() + additionalDays * 24 * 60 * 60 * 1000);
+      sheet.getRange(i + 1, 6).setValue(newExpiry);
+      sheet.getRange(i + 1, 5).setValue(rows[i][4] + additionalDays);
+      return respond_({success: true});
     }
   }
+  return respond_({success: false, error: 'بائع غير موجود'});
+}
 
-  function openExtend(id) { currentSellerId = id; document.getElementById('extendPopup').classList.add('open'); }
-  function closeExtend() { document.getElementById('extendPopup').classList.remove('open'); currentSellerId = null; }
-
-  async function confirmExtend() {
-    const days = parseInt(document.getElementById('extendDays').value) || 0;
-    const hours = parseInt(document.getElementById('extendHours').value) || 0;
-    if (days === 0 && hours === 0) return showMessage('أدخل مدة أكبر من صفر', 'error');
-    const additionalDays = days + (hours / 24);
-    const res = await api('extend', { id: currentSellerId, additionalDays });
-    if (res.success) {
-      showMessage('تم تمديد الاشتراك', 'success');
-      closeExtend();
-      loadSellers();
-    } else { showMessage(res.error || 'فشل التمديد', 'error'); }
+function deleteSeller_(sheet, data) {
+  const { id } = data;
+  const rows = sheet.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if (rows[i][0] === id) {
+      sheet.deleteRow(i + 1);
+      return respond_({success: true});
+    }
   }
+  return respond_({success: false, error: 'بائع غير موجود'});
+}
 
-  async function deleteSeller(id) {
-    if (!confirm('هل أنت متأكد من حذف هذا البائع؟')) return;
-    const res = await api('delete', { id });
-    if (res.success) { showMessage('تم الحذف', 'success'); loadSellers(); }
-    else { showMessage(res.error || 'فشل الحذف', 'error'); }
+function listSellers_(sheet) {
+  const rows = sheet.getDataRange().getValues();
+  const sellers = rows.slice(1).map(row => ({
+    id: row[0],
+    name: row[1],
+    email: row[2],
+    startDate: row[3],
+    durationDays: row[4],
+    expiryDate: row[5]
+  }));
+  return respond_({success: true, sellers});
+}
+
+function respond_(data) {
+  return ContentService.createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function checkExpiredSubscriptions() {
+  const sheet = getSheet_();
+  const rows = sheet.getDataRange().getValues();
+  const now = new Date();
+  const expired = [];
+  for (let i = 1; i < rows.length; i++) {
+    const expiry = new Date(rows[i][5]);
+    if (expiry <= now) expired.push({ name: rows[i][1], email: rows[i][2] });
   }
-
-  function showMessage(text, type) {
-    const msg = document.getElementById('message');
-    msg.textContent = text; msg.className = 'message ' + type;
-    setTimeout(() => { msg.className = 'message'; }, 4000);
+  if (expired.length > 0) {
+    let html = '<h3>تنبيه: انتهت اشتراكات البائعين التاليين</h3><ul>';
+    expired.forEach(s => { html += `<li>${s.name} (${s.email})</li>`; });
+    html += '</ul>';
+    GmailApp.sendEmail(OWNER_EMAIL, 'اشتراكات منتهية - منصة إعلم', '', {htmlBody: html});
   }
+}
 
-  setInterval(updateTimers, 60000);
-  window.onload = loadSellers;
-</script>
-</body>
-</html>
+function doGet() {
+  return ContentService.createTextOutput('OK').setMimeType(ContentService.MimeType.TEXT);
+}
